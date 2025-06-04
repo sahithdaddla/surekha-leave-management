@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Leave Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2f3790 0%, #7dacf4 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        label.required:after {
+            content: " *";
+            color: red;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: none;
+        }
+
+        input[type="file"] {
+            padding: 0.4rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3949ab;
+            box-shadow: 0 0 0 2px rgba(57, 73, 171, 0.2);
+        }
+
+        .submit-btn {
+            background-color: #3949ab;
+            color: white;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+
+        .submit-btn:hover {
+            background-color: #303f9f;
+            transform: translateY(-1px);
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.8em;
+            position: absolute;
+            bottom: -1.2rem;
+            left: 0;
+            display: none;
+        }
+
+        .form-group.error input, 
+        .form-group.error textarea,
+        .form-group.error select,
+        .form-group.error input[type="file"] {
+            border-color: red;
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        .success-message {
+            background-color: #4caf50;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .error-alert {
+            background-color: #f44336;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .char-counter {
+            position: absolute;
+            right: 0;
+            top: 7.5rem;
+            right: 0.2rem;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .date-input-container {
+            position: relative;
+        }
+
+        .date-input-container input {
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .date-input-container input:read-only {
+            background-color: white;
+        }
+
+        .calendar-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #3949ab;
+            pointer-events: none;
+        }
+
+        .info-icon {
+            display: inline-block;
+            margin-left: 8px;
+            width: 18px;
+            height: 18px;
+            background-color: #3949ab;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            cursor: help;
+            position: relative;
+        }
+
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 250px;
+            top: -5px;
+            left: 25px;
+            z-index: 100;
+            font-size: 12px;
+            text-align: left;
+            line-height: 1.4;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .info-tooltip:after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 100%;
+            margin-top: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent #333 transparent transparent;
+        }
+
+        .info-icon:hover .info-tooltip {
+            display: block;
+        }
+
+        .leave-type-container, .label-with-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .certificate-group {
+            display: none;
+        }
+
+        .certificate-group.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Employee Leave Portal</h1>
+        </div>
+        <div id="successMessage" class="success-message">
+            Leave request submitted successfully!
+        </div>
+        <div id="errorAlert" class="error-alert">
+            You have already submitted a leave request today. Only one request per day is allowed.
+        </div>
+        <div class="form-container">
+            <form id="leaveForm" novalidate>
+                <div class="form-group" id="employeeNameGroup">
+                    <label for="employeeName" class="required">Employee Name</label>
+                    <input type="text" id="employeeName" placeholder="Enter your full name" required>
+                    <div id="employeeNameError" class="error-message">
+                        Name must contain 5-30 letters (only alphabets, no multiple spaces)
+                    </div>
+                </div>
+
+                <div class="form-group" id="employeeIdGroup">
+                    <div class="label-with-info">
+                        <label for="employeeId" class="required">Employee ID</label>
+                        <div id="employeeIdInfo" class="info-icon">i
+                            <div class="info-tooltip">
+                                Employee ID must be in the format ATS0XXX, where XXX is a three-digit number. The last three digits cannot all be zeros.
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" id="employeeId" required placeholder="Format: ATS0XXX">
+                    <div id="employeeIdError" class="error-message">
+                        ID must start with ATS0 followed by 3 digits (not all zeros)
+                    </div>
+                </div>
+
+                <div class="form-group" id="leaveTypeGroup">
+                    <div class="label-with-info">
+                        <label for="leaveType" class="required">Leave Type</label>
+                        <div id="leaveTypeInfo" class="info-icon">i
+                            <div class="info-tooltip" id="leaveTypeTooltip">
+                                Select the appropriate leave type. Annual leave: Current date to 30 days. Sick leave: 1 month (past 10 days to future 20 days). Maternity leave: 6 months. Paternity leave: 30 days. Certificate required for Sick leave exceeding 7 days.
+                            </div>
+                        </div>
+                    </div>
+                    <select id="leaveType" required>
+                        <option value="">Select Leave Type</option>
+                        <option value="Annual Leave">Annual Leave</option>
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Personal Leave">Personal Leave</option>
+                        <option value="Maternity Leave">Maternity Leave</option>
+                        <option value="Paternity Leave">Paternity Leave</option>
+                    </select>
+                    <div id="leaveTypeError" class="error-message">
+                        Please select a leave type
+                    </div>
+                </div>
+
+                <div class="form-group" id="startDateGroup">
+                    <label for="startDate" class="required">Start Date</label>
+                    <div class="date-input-container">
+                        <input type="date" id="startDate" required>
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                    <div id="startDateError" class="error-message">
+                        Please select a valid date
+                    </div>
+                </div>
+
+                <div class="form-group" id="endDateGroup">
+                    <label for="endDate" class="required">End Date</label>
+                    <div class="date-input-container">
+                        <input type="date" id="endDate" required>
+                        <span class="calendar-icon">📅</span>
+                    </div>
+                    <div id="endDateError" class="error-message">
+                        Please select a valid date
+                    </div>
+                </div>
+
+                <div class="form-group certificate-group" id="certificateGroup">
+                    <label for="certificate" class="required">Medical Certificate (PDF)</label>
+                    <input type="file" id="certificate" accept="application/pdf">
+                    <div id="certificateError" class="error-message">
+                        Please upload a valid PDF file (max 5MB)
+                    </div>
+                </div>
+
+                <div class="form-group" id="reasonGroup">
+                    <div class="label-with-info">
+                        <label for="reason" class="required">Reason for Leave</label>
+                    </div>
+                    <div class="char-counter"><span id="charCount">0</span>/400</div>
+                    <textarea id="reason" rows="4" required placeholder="Provide reason for leave"></textarea>
+                    <div id="reasonError" class="error-message">
+                        Reason must not exceed 400 characters (excluding spaces) and cannot be empty
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Request</button>
+            </form>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('leaveForm');
+        const employeeIdInput = document.getElementById('employeeId');
+        const employeeNameInput = document.getElementById('employeeName');
+        const reasonInput = document.getElementById('reason');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const leaveTypeSelect = document.getElementById('leaveType');
+        const certificateInput = document.getElementById('certificate');
+        const certificateGroup = document.getElementById('certificateGroup');
+        const leaveTypeTooltip = document.getElementById('leaveTypeTooltip');
+        const successMessage = document.getElementById('successMessage');
+        const errorAlert = document.getElementById('errorAlert');
+        const charCount = document.getElementById('charCount');
+
+        // Set up date limits and initial values
+        setupDatePickers();
+
+        function setupDatePickers() {
+            const today = new Date();
+            const tenDaysAgo = new Date(today);
+            tenDaysAgo.setDate(today.getDate() - 10);
+            const twentyDaysLater = new Date(today);
+            twentyDaysLater.setDate(today.getDate() + 20);
+            const thirtyDaysLater = new Date(today);
+            thirtyDaysLater.setDate(today.getDate() + 30);
+            const sixMonthsLater = new Date(today);
+            sixMonthsLater.setMonth(today.getMonth() + 6);
+
+            const todayFormatted = today.toISOString().split('T')[0];
+            const tenDaysAgoFormatted = tenDaysAgo.toISOString().split('T')[0];
+            const twentyDaysLaterFormatted = twentyDaysLater.toISOString().split('T')[0];
+            const thirtyDaysLaterFormatted = thirtyDaysLater.toISOString().split('T')[0];
+            const sixMonthsLaterFormatted = sixMonthsLater.toISOString().split('T')[0];
+
+            startDateInput.value = '';
+            endDateInput.value = '';
+
+            leaveTypeSelect.addEventListener('change', updateDateConstraints);
+            startDateInput.addEventListener('change', updateDateConstraints);
+            endDateInput.addEventListener('change', function() {
+                validateDates();
+                updateCertificateRequirement();
+            });
+
+            function updateDateConstraints() {
+                const leaveType = leaveTypeSelect.value;
+                
+                if (leaveType === 'Annual Leave') {
+                    startDateInput.min = todayFormatted;
+                    startDateInput.max = thirtyDaysLaterFormatted;
+                    endDateInput.min = startDateInput.value || todayFormatted;
+                    endDateInput.max = thirtyDaysLaterFormatted;
+                } else if (leaveType === 'Sick Leave') {
+                    startDateInput.min = tenDaysAgoFormatted;
+                    startDateInput.max = twentyDaysLaterFormatted;
+                    endDateInput.min = startDateInput.value || tenDaysAgoFormatted;
+                    endDateInput.max = twentyDaysLaterFormatted;
+                } else if (leaveType === 'Maternity Leave') {
+                    startDateInput.min = tenDaysAgoFormatted;
+                    startDateInput.max = sixMonthsLaterFormatted;
+                    endDateInput.min = startDateInput.value || tenDaysAgoFormatted;
+                    endDateInput.max = sixMonthsLaterFormatted;
+                } else {
+                    startDateInput.min = tenDaysAgoFormatted;
+                    startDateInput.max = sixMonthsLaterFormatted;
+                    endDateInput.min = startDateInput.value || tenDaysAgoFormatted;
+                    endDateInput.max = sixMonthsLaterFormatted;
+                }
+                
+                validateDates();
+                updateCertificateRequirement();
+            }
+
+            startDateInput.addEventListener('input', validateStartDate);
+            endDateInput.addEventListener('input', validateEndDate);
+        }
+
+        function updateCertificateRequirement() {
+            const leaveType = leaveTypeSelect.value;
+            const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+            const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+
+            if (leaveType === 'Sick Leave' && startDate && endDate) {
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays > 7) {
+                    certificateGroup.classList.add('visible');
+                    certificateInput.required = true;
+                } else {
+                    certificateGroup.classList.remove('visible');
+                    certificateInput.required = false;
+                    certificateInput.value = '';
+                }
+            } else {
+                certificateGroup.classList.remove('visible');
+                certificateInput.required = false;
+                certificateInput.value = '';
+            }
+            validateCertificate();
+        }
+
+        function validateCertificate() {
+            if (!certificateInput.required) {
+                certificateGroup.classList.remove('error');
+                document.getElementById('certificateError').style.display = 'none';
+                return true;
+            }
+
+            const file = certificateInput.files[0];
+            const errorGroup = document.getElementById('certificateGroup');
+
+            if (!file) {
+                errorGroup.classList.add('error');
+                document.getElementById('certificateError').textContent = 'Medical certificate is required for sick leave exceeding 7 days';
+                document.getElementById('certificateError').style.display = 'block';
+                return false;
+            }
+
+            const validFormat = file.type === 'application/pdf';
+            const validSize = file.size <= 5 * 1024 * 1024;
+
+            if (!validFormat) {
+                errorGroup.classList.add('error');
+                document.getElementById('certificateError').textContent = 'Please upload a valid PDF file';
+                document.getElementById('certificateError').style.display = 'block';
+                return false;
+            }
+
+            if (!validSize) {
+                errorGroup.classList.add('error');
+                document.getElementById('certificateError').textContent = 'File size must not exceed 5MB';
+                document.getElementById('certificateError').style.display = 'block';
+                return false;
+            }
+
+            errorGroup.classList.remove('error');
+            document.getElementById('certificateError').style.display = 'none';
+            return true;
+        }
+
+        function validateEmployeeId() {
+            const value = employeeIdInput.value.trim();
+            if (!value) {
+                const errorGroup = document.getElementById('employeeIdGroup');
+                errorGroup.classList.add('error');
+                document.getElementById('employeeIdError').textContent = 'Employee ID is required';
+                document.getElementById('employeeIdError').style.display = 'block';
+                return false;
+            }
+
+            const regex = /^ATS0[0-9]{3}$/;
+            const isValid = regex.test(value);
+            const lastThreeDigits = value.slice(4);
+            const areAllZeros = lastThreeDigits === '000';
+            const errorGroup = document.getElementById('employeeIdGroup');
+
+            if (isValid && !areAllZeros) {
+                errorGroup.classList.remove('error');
+                document.getElementById('employeeIdError').style.display = 'none';
+                return true;
+            } else {
+                errorGroup.classList.add('error');
+                document.getElementById('employeeIdError').textContent = areAllZeros ? 
+                    'Last three digits cannot all be zeros' : 
+                    'ID must start with ATS0 followed by 3 digits';
+                document.getElementById('employeeIdError').style.display = 'block';
+                return false;
+            }
+        }
+
+        function validateEmployeeName() {
+            const nameValue = employeeNameInput.value.trim();
+            if (!nameValue) {
+                const errorGroup = document.getElementById('employeeNameGroup');
+                errorGroup.classList.add('error');
+                document.getElementById('employeeNameError').textContent = 'Employee name is required';
+                document.getElementById('employeeNameError').style.display = 'block';
+                return false;
+            }
+
+            if (!/[a-zA-Z]/.test(nameValue)) {
+                const errorGroup = document.getElementById('employeeNameGroup');
+                errorGroup.classList.add('error');
+                document.getElementById('employeeNameError').textContent = 'Name must contain at least one letter';
+                document.getElementById('employeeNameError').style.display = 'block';
+                return false;
+            }
+
+            const letterCount = nameValue.replace(/[^a-zA-Z]/g, '').length;
+            const containsOnlyLettersAndSingleSpaces = /^[a-zA-Z]+( [a-zA-Z]+)*$/.test(nameValue);
+            const isValid = letterCount >= 5 && letterCount <= 30 && containsOnlyLettersAndSingleSpaces;
+            const errorGroup = document.getElementById('employeeNameGroup');
+
+            if (isValid) {
+                errorGroup.classList.remove('error');
+                document.getElementById('employeeNameError').style.display = 'none';
+            } else {
+                errorGroup.classList.add('error');
+                document.getElementById('employeeNameError').style.display = 'block';
+                if (letterCount < 5) {
+                    document.getElementById('employeeNameError').textContent = 'Name must contain at least 5 letters';
+                } else if (letterCount > 30) {
+                    document.getElementById('employeeNameError').textContent = 'Name cannot exceed 30 letters';
+                } else {
+                    document.getElementById('employeeNameError').textContent = 'Name must contain only alphabets with single spaces';
+                }
+            }
+
+            return isValid;
+        }
+
+        function validateLeaveType() {
+            const leaveTypeValue = leaveTypeSelect.value;
+            const leaveTypeGroup = document.getElementById('leaveTypeGroup');
+
+            if (!leaveTypeValue) {
+                leaveTypeGroup.classList.add('error');
+                document.getElementById('leaveTypeError').style.display = 'block';
+                return false;
+            } else {
+                leaveTypeGroup.classList.remove('error');
+                document.getElementById('leaveTypeError').style.display = 'none';
+                return true;
+            }
+        }
+
+        function validateReason() {
+            const reasonValue = reasonInput.value.trim();
+            if (!reasonValue) {
+                const errorGroup = document.getElementById('reasonGroup');
+                errorGroup.classList.add('error');
+                document.getElementById('reasonError').textContent = 'Reason for leave is required';
+                document.getElementById('reasonError').style.display = 'block';
+                return false;
+            }
+
+            if (!/\S/.test(reasonValue)) {
+                const errorGroup = document.getElementById('reasonGroup');
+                errorGroup.classList.add('error');
+                document.getElementById('reasonError').textContent = 'Reason cannot be only spaces';
+                document.getElementById('reasonError').style.display = 'block';
+                return false;
+            }
+
+            const charCountExcludingSpaces = reasonValue.replace(/\s/g, '').length;
+            const containsValidChars = /^[a-zA-Z][a-zA-Z0-9\s!@#$%^&*()_+\-=\[\]{}\\|;:'",.<>?/~`]*$/.test(reasonValue);
+            const noConsecutiveSpecialOrDigits = !/([0-9!@#$%^&*()_+\-=\[\]{}\\|;:'",.<>?/~`])\1/.test(reasonValue);
+            const noMultipleSpaces = !/\s{2,}/.test(reasonValue);
+            const isValid = charCountExcludingSpaces > 0 && charCountExcludingSpaces <= 400 && containsValidChars && noConsecutiveSpecialOrDigits && noMultipleSpaces;
+            const errorGroup = document.getElementById('reasonGroup');
+
+            if (isValid) {
+                errorGroup.classList.remove('error');
+                document.getElementById('reasonError').style.display = 'none';
+            } else {
+                errorGroup.classList.add('error');
+                document.getElementById('reasonError').style.display = 'block';
+                if (charCountExcludingSpaces > 400) {
+                    document.getElementById('reasonError').textContent = 'Reason cannot exceed 400 characters (excluding spaces)';
+                } else if (!noMultipleSpaces) {
+                    document.getElementById('reasonError').textContent = 'Multiple spaces are not allowed';
+                } else if (!noConsecutiveSpecialOrDigits) {
+                    document.getElementById('reasonError').textContent = 'Consecutive special characters or digits are not allowed';
+                } else if (!containsValidChars) {
+                    document.getElementById('reasonError').textContent = 'Reason must start with a letter and contain valid characters';
+                } else {
+                    document.getElementById('reasonError').textContent = 'Reason is required';
+                }
+            }
+            return isValid;
+        }
+
+        function validateStartDate() {
+            const startDateValue = startDateInput.value;
+            const startDateGroup = document.getElementById('startDateGroup');
+            const leaveType = leaveTypeSelect.value;
+
+            if (!startDateValue) {
+                startDateGroup.classList.add('error');
+                document.getElementById('startDateError').textContent = 'Start date is required';
+                document.getElementById('startDateError').style.display = 'block';
+                return false;
+            }
+
+            const selectedDate = new Date(startDateValue);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
+            const tenDaysAgo = new Date(today);
+            tenDaysAgo.setDate(today.getDate() - 10);
+            const twentyDaysLater = new Date(today);
+            twentyDaysLater.setDate(today.getDate() + 20);
+            const thirtyDaysLater = new Date(today);
+            thirtyDaysLater.setDate(today.getDate() + 30);
+            const sixMonthsLater = new Date(today);
+            sixMonthsLater.setMonth(today.getMonth() + 6);
+
+            if (leaveType === 'Annual Leave') {
+                if (selectedDate < today) {
+                    startDateGroup.classList.add('error');
+                    document.getElementById('startDateError').textContent = 'Annual leave start date cannot be in the past';
+                    document.getElementById('startDateError').style.display = 'block';
+                    return false;
+                }
+                if (selectedDate > thirtyDaysLater) {
+                    startDateGroup.classList.add('error');
+                    document.getElementById('startDateError').textContent = 'Annual leave start date cannot be more than 30 days in the future';
+                    document.getElementById('startDateError').style.display = 'block';
+                    return false;
+                }
+            } else if (leaveType === 'Sick Leave') {
+                if (selectedDate < tenDaysAgo) {
+                    startDateGroup.classList.add('error');
+                    document.getElementById('startDateError').textContent = 'Sick leave start date cannot be more than 10 days in the past';
+                    document.getElementById('startDateError').style.display = 'block';
+                    return false;
+                }
+                if (selectedDate > twentyDaysLater) {
+                    startDateGroup.classList.add('error');
+                    document.getElementById('startDateError').textContent = 'Sick leave start date cannot be more than 20 days in the future';
+                    document.getElementById('startDateError').style.display = 'block';
+                    return false;
+                }
+            } else {
+                if (selectedDate < tenDaysAgo) {
+                    startDateGroup.classList.add('error');
+                    document.getElementById('startDateError').textContent = 'Date cannot be more than 10 days in the past';
+                    document.getElementById('startDateError').style.display = 'block';
+                    return false;
+                }
+                if (selectedDate > sixMonthsLater) {
+                    startDateGroup.classList.add('error');
+                    document.getElementById('startDateError').textContent = 'Date cannot be more than six months in the future';
+                    document.getElementById('startDateError').style.display = 'block';
+                    return false;
+                }
+            }
+
+            startDateGroup.classList.remove('error');
+            document.getElementById('startDateError').style.display = 'none';
+            return true;
+        }
+
+        function validateEndDate() {
+            const endDateValue = endDateInput.value;
+            const endDateGroup = document.getElementById('endDateGroup');
+            const leaveType = leaveTypeSelect.value;
+
+            if (!endDateValue) {
+                endDateGroup.classList.add('error');
+                document.getElementById('endDateError').textContent = 'End date is required';
+                document.getElementById('endDateError').style.display = 'block';
+                return false;
+            }
+
+            const selectedDate = new Date(endDateValue);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
+            const tenDaysAgo = new Date(today);
+            tenDaysAgo.setDate(today.getDate() - 10);
+            const twentyDaysLater = new Date(today);
+            twentyDaysLater.setDate(today.getDate() + 20);
+            const thirtyDaysLater = new Date(today);
+            thirtyDaysLater.setDate(today.getDate() + 30);
+            const sixMonthsLater = new Date(today);
+            sixMonthsLater.setMonth(today.getMonth() + 6);
+
+            if (leaveType === 'Annual Leave') {
+                if (selectedDate < today) {
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Annual leave end date cannot be in the past';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+                if (selectedDate > thirtyDaysLater) {
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Annual leave end date cannot be more than 30 days in the future';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+            } else if (leaveType === 'Sick Leave') {
+                if (selectedDate < tenDaysAgo) {
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Sick leave end date cannot be more than 10 days in the past';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+                if (selectedDate > twentyDaysLater) {
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Sick leave end date cannot be more than 20 days in the future';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+            } else {
+                if (selectedDate < tenDaysAgo) {
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Date cannot be more than 10 days in the past';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+                if (selectedDate > sixMonthsLater) {
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Date cannot be more than six months in the future';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+            }
+
+            if (startDateInput.value && endDateValue < startDateInput.value) {
+                endDateGroup.classList.add('error');
+                document.getElementById('endDateError').textContent = 'End date cannot be earlier than start date';
+                document.getElementById('endDateError').style.display = 'block';
+                return false;
+            }
+
+            endDateGroup.classList.remove('error');
+            document.getElementById('endDateError').style.display = 'none';
+            return true;
+        }
+
+        function validateDates() {
+            const startDateValid = validateStartDate();
+            const endDateValid = validateEndDate();
+
+            if (startDateValid && endDateValid) {
+                const leaveType = leaveTypeSelect.value;
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Including both start and end dates
+
+                if (leaveType === 'Annual Leave') {
+                    if (diffDays > 30) {
+                        const endDateGroup = document.getElementById('endDateGroup');
+                        endDateGroup.classList.add('error');
+                        document.getElementById('endDateError').textContent = 'Annual leave cannot exceed 30 days';
+                        document.getElementById('endDateError').style.display = 'block';
+                        return false;
+                    }
+                } else if (leaveType === 'Sick Leave' && diffDays > 30) {
+                    const endDateGroup = document.getElementById('endDateGroup');
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Sick leave cannot exceed 1 month';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                } else if (leaveType === 'Maternity Leave' && diffDays > 180) {
+                    const endDateGroup = document.getElementById('endDateGroup');
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Maternity leave cannot exceed 6 months';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                } else if (leaveType === 'Paternity Leave' && diffDays > 30) {
+                    const endDateGroup = document.getElementById('endDateGroup');
+                    endDateGroup.classList.add('error');
+                    document.getElementById('endDateError').textContent = 'Paternity leave cannot exceed 30 days';
+                    document.getElementById('endDateError').style.display = 'block';
+                    return false;
+                }
+            }
+
+            return startDateValid && endDateValid;
+        }
+
+        function updateCharCount() {
+            const charCountExcludingSpaces = reasonInput.value.replace(/\s/g, '').length;
+            charCount.textContent = charCountExcludingSpaces;
+            charCount.style.color = charCountExcludingSpaces > 400 ? 'red' : '#666';
+        }
+
+        function updateLeaveTypeInfo() {
+            const leaveType = leaveTypeSelect.value;
+            if (leaveType === 'Annual Leave') {
+                leaveTypeTooltip.textContent = 'Annual leave from current date to 30 days in future.';
+            } else if (leaveType === 'Sick Leave') {
+                leaveTypeTooltip.textContent = 'Sick leave up to 1 month (from 10 days past to 20 days future). Certificate required if exceeding 7 days.';
+            } else if (leaveType === 'Maternity Leave') {
+                leaveTypeTooltip.textContent = 'Maternity leave up to 6 months.';
+            } else if (leaveType === 'Paternity Leave') {
+                leaveTypeTooltip.textContent = 'Paternity leave up to 30 days.';
+            } else {
+                leaveTypeTooltip.textContent = 'Select the appropriate leave type. Annual leave: Current date to 30 days. Sick leave: 1 month (past 10 days to future 20 days). Maternity leave: 6 months. Paternity leave: 30 days. Certificate required for Sick leave exceeding 7 days.';
+            }
+        }
+
+        employeeIdInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '').toUpperCase();
+            value = value.replace(/[^A-Z0-9]/g, '');
+            if (!value.startsWith('ATS0')) {
+                value = 'ATS0' + value.replace(/[^0-9]/g, '').slice(0, 3);
+            } else {
+                value = 'ATS0' + value.slice(4).replace(/[^0-9]/g, '').slice(0, 3);
+            }
+            e.target.value = value;
+            validateEmployeeId();
+        });
+
+        employeeNameInput.setAttribute('maxLength', '50');
+        employeeNameInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            if (value.trim() === '' && value !== '') {
+                e.target.value = '';
+                value = '';
+            }
+
+            value = value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ');
+            e.target.value = value;
+
+            const letterCount = value.replace(/[^a-zA-Z]/g, '').length;
+            if (letterCount > 30) {
+                let count = 0;
+                let cutoff = 0;
+                for (let i = 0; i < value.length; i++) {
+                    if (/[a-zA-Z]/.test(value[i])) {
+                        count++;
+                    }
+                    if (count > 30) {
+                        cutoff = i;
+                        break;
+                    }
+                }
+                e.target.value = value.substring(0, cutoff);
+            }
+
+            validateEmployeeName();
+        });
+
+        reasonInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+            if (value.trim() === '' && value !== '') {
+                e.target.value = '';
+                value = '';
+            }
+
+            value = value.replace(/\s+/g, ' ');
+            if (!/^[a-zA-Z]/.test(value)) {
+                value = value.replace(/^[^a-zA-Z]+/, '');
+            }
+            
+            // Prevent consecutive special characters or digits
+            value = value.replace(/([0-9!@#$%^&*()_+\-=\[\]{}\\|;:'",.<>?/~`])\1+/g, '$1');
+            
+            // Allow special characters and digits only after letters
+            let result = '';
+            let letterFound = false;
+            for (let i = 0; i < value.length; i++) {
+                if (/[a-zA-Z]/.test(value[i])) {
+                    letterFound = true;
+                    result += value[i];
+                } else if (letterFound && /[0-9\s!@#$%^&*()_+\-=\[\]{}\\|;:'",.<>?/~`]/.test(value[i])) {
+                    result += value[i];
+                }
+            }
+            value = result;
+            e.target.value = value;
+
+            const charCountExcludingSpaces = value.replace(/\s/g, '').length;
+            if (charCountExcludingSpaces > 400) {
+                let count = 0;
+                let cutoff = 0;
+                for (let i = 0; i < value.length; i++) {
+                    if (value[i] !== ' ') {
+                        count++;
+                    }
+                    if (count > 400) {
+                        cutoff = i;
+                        break;
+                    }
+                }
+                e.target.value = value.substring(0, cutoff);
+            }
+
+            validateReason();
+            updateCharCount();
+        });
+
+        certificateInput.addEventListener('change', validateCertificate);
+
+        leaveTypeSelect.addEventListener('change', function() {
+            updateLeaveTypeInfo();
+            validateLeaveType();
+            validateDates();
+            updateCertificateRequirement();
+        });
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const isIdValid = validateEmployeeId();
+            const isNameValid = validateEmployeeName();
+            const isLeaveTypeValid = validateLeaveType();
+            const isReasonValid = validateReason();
+            const areDatesValid = validateDates();
+            const isCertificateValid = validateCertificate();
+
+            if (!isIdValid || !isNameValid || !isLeaveTypeValid || !isReasonValid || !areDatesValid || !isCertificateValid) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('employeeId', employeeIdInput.value);
+            formData.append('employeeName', employeeNameInput.value);
+            formData.append('leaveType', leaveTypeSelect.value);
+            formData.append('startDate', startDateInput.value);
+            formData.append('endDate', endDateInput.value);
+            formData.append('reason', reasonInput.value);
+            if (certificateInput.files[0]) {
+                formData.append('certificate', certificateInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/leave-request', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    successMessage.style.display = 'block';
+                    form.reset();
+                    certificateGroup.classList.remove('visible');
+                    certificateInput.required = false;
+                    charCount.textContent = '0';
+                    document.querySelectorAll('.form-group').forEach(group => group.classList.remove('error'));
+                    setTimeout(() => successMessage.style.display = 'none', 3000);
+                } else {
+                    errorAlert.textContent = result.error;
+                    errorAlert.style.display = 'block';
+                    setTimeout(() => errorAlert.style.display = 'none', 3000);
+                }
+            } catch (error) {
+                console.error('Error submitting request:', error);
+                errorAlert.textContent = 'Server error';
+                errorAlert.style.display = 'block';
+                setTimeout(() => errorAlert.style.display = 'none', 3000);
+            }
+        });
+
+        updateCharCount();
+        updateLeaveTypeInfo();
+    });
+    </script>
+</body>
+</html>

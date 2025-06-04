@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Leave Management Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2f3790 0%, #7dacf4 100%);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3949ab;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .status-filter select {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .clear-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #3949ab;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .employee-info .employee-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .employee-info .employee-id {
+            font-size: 0.9rem;
+            color: #666;
+            display: block;
+            margin-top: 0.3rem;
+        }
+
+        .leave-type, .duration {
+            color: #34495e;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-approved {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-rejected {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .view-btn {
+            background-color: #3949ab;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background-color: #303f9f;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.8rem;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #2c3e50;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            color: #34495e;
+            flex: 1;
+        }
+
+        .detail-value.reason {
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.5;
+            max-width: 400px;
+        }
+
+        .modal-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .approve-btn {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .approve-btn:hover {
+            background-color: #388e3c;
+        }
+
+        .reject-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .reject-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .delete-btn {
+            background-color: #666;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #555;
+        }
+
+        .certificate-link {
+            color: #3949ab;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .certificate-link:hover {
+            color: #303f9f;
+        }
+
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem;
+            border-radius: 4px;
+            color: white;
+            min-width: 300px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .alert-success {
+            background-color: #4caf50;
+        }
+
+        .alert-error {
+            background-color: #f44336;
+        }
+
+        .no-records {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .no-records i {
+            font-size: 1.5rem;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            th, td {
+                min-width: 120px;
+            }
+
+            td {
+                display: block;
+                text-align: right;
+                position: relative;
+                padding-left: 50%;
+                border-bottom: 1px solid #ddd;
+            }
+
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                text-align: left;
+                font-weight: 500;
+                color: #2c3e50;
+            }
+
+            tr {
+                margin-bottom: 1rem;
+                display: block;
+                border-bottom: 2px solid #ddd;
+            }
+
+            th {
+                display: none;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HR Leave Management Dashboard</h1>
+        </div>
+
+        <div id="alert" class="alert">
+            <span id="alertMessage"></span>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Requests</h3>
+                <p id="totalRequests">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingRequests">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Approved</h3>
+                <p id="approvedRequests">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Rejected</h3>
+                <p id="rejectedRequests">0</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-bar">
+                <input type="text" id="searchBar" placeholder="Search by name or ID">
+            </div>
+            <div class="status-filter">
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <button class="clear-btn" onclick="clearRecords()">Clear All Records</button>
+        </div>
+
+        <div id="leaveRequests">
+            <table id="leaveTable">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Employee ID</th>
+                        <th>Leave Type</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="leaveTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Leave Request Details</h2>
+                    <span class="close-btn" onclick="closeModal()">×</span>
+                </div>
+                <div id="modalContent"></div>
+                <div id="modalActions" class="modal-actions"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const stats = {
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0
+    };
+
+    // Function to format date as DD/MM/YYYY
+    function formatDate(date) {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    async function updateStats() {
+        try {
+            const response = await fetch('http://localhost:3000/api/leave-requests');
+            const leaveRequests = await response.json();
+            stats.total = leaveRequests.length;
+            stats.pending = leaveRequests.filter(req => req.status === 'pending').length;
+            stats.approved = leaveRequests.filter(req => req.status === 'approved').length;
+            stats.rejected = leaveRequests.filter(req => req.status === 'rejected').length;
+
+            document.getElementById('totalRequests').textContent = stats.total;
+            document.getElementById('pendingRequests').textContent = stats.pending;
+            document.getElementById('approvedRequests').textContent = stats.approved;
+            document.getElementById('rejectedRequests').textContent = stats.rejected;
+        } catch (error) {
+            console.error('Error updating stats:', error);
+            showAlert('Failed to update statistics', 'error');
+        }
+    }
+
+    async function renderLeaveRequests(searchTerm = '', statusFilter = '') {
+        try {
+            const url = new URL('http://localhost:3000/api/leave-requests');
+            if (searchTerm) url.searchParams.append('search', searchTerm);
+            if (statusFilter) url.searchParams.append('status', statusFilter);
+            const response = await fetch(url);
+            const leaveRequests = await response.json();
+            const tableBody = document.getElementById('leaveTableBody');
+            tableBody.innerHTML = '';
+
+            // Remove any existing no-records message
+            const container = document.getElementById('leaveRequests');
+            const existingNoRecords = document.querySelector('.no-records');
+            if (existingNoRecords) existingNoRecords.remove();
+
+            if (leaveRequests.length === 0) {
+                document.getElementById('leaveTable').style.display = 'none';
+                const noRecordsDiv = document.createElement('div');
+                noRecordsDiv.className = 'no-records';
+                noRecordsDiv.innerHTML = '<i class="fas fa-info-circle"></i> No records found';
+                container.appendChild(noRecordsDiv);
+                return;
+            }
+
+            document.getElementById('leaveTable').style.display = 'table';
+
+            leaveRequests.forEach(request => {
+                const row = document.createElement('tr');
+                const statusClass = `status-${request.status}`;
+                const start = new Date(request.start_date);
+                const end = new Date(request.end_date);
+                const durationDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+                row.innerHTML = `
+                    <td data-label="Employee">
+                        <div class="employee-info">
+                            <span class="employee-name">${request.employee_name}</span>
+                        </div>
+                    </td>
+                    <td data-label="Employee ID"><span class="employee-id">${request.employee_id}</span></td>
+                    <td data-label="Leave Type"><span class="leave-type">${request.leave_type}</span></td>
+                    <td data-label="Duration"><span class="duration">${durationDays} day${durationDays > 1 ? 's' : ''}</span></td>
+                    <td data-label="Status"><span class="status-badge ${statusClass}">${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span></td>
+                    <td data-label="Actions">
+                        <button class="action-btn view-btn" onclick="viewRequestDetails(${request.id})">View</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error rendering requests:', error);
+            showAlert('Failed to load leave requests', 'error');
+        }
+    }
+
+    async function viewRequestDetails(id) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/leave-requests?id=${id}`);
+            const requests = await response.json();
+            const request = requests.find(req => req.id === id);
+
+            if (request) {
+                const startDate = formatDate(request.start_date);
+                const endDate = formatDate(request.end_date);
+                const start = new Date(request.start_date);
+                const end = new Date(request.end_date);
+                const durationDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                let certificateHTML = '';
+                if (request.leave_type === 'Sick Leave' && request.certificate_path && durationDays > 7) {
+                    certificateHTML = `
+                        <div class="detail-row">
+                            <span class="detail-label">Medical Certificate:</span>
+                            <a href="http://localhost:3000/api/certificate/${request.id}" class="certificate-link" download="certificate_${request.employee_id}.pdf" target="_blank">View Certificate</a>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('modalContent').innerHTML = `
+                    <div class="detail-row">
+                        <span class="detail-label">Employee Name:</span>
+                        <span class="detail-value">${request.employee_name}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Employee ID:</span>
+                        <span class="detail-value">${request.employee_id}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Leave Type:</span>
+                        <span class="detail-value">${request.leave_type}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Start Date:</span>
+                        <span class="detail-value">${startDate}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">End Date:</span>
+                        <span class="detail-value">${endDate}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Duration:</span>
+                        <span class="detail-value">${durationDays} day${durationDays > 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Reason:</span>
+                        <span class="detail-value reason">${request.reason}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status:</span>
+                        <span class="status-badge status-${request.status}">${request.status.charAt(0).toUpperCase() + request.status.slice(1)}</span>
+                    </div>
+                    ${certificateHTML}
+                `;
+
+                const modalActions = document.getElementById('modalActions');
+                modalActions.innerHTML = `
+                    ${request.status === 'pending' ? `
+                        <button class="action-btn approve-btn" onclick="confirmAction(${request.id}, 'approve', '${request.employee_id}')">Approve</button>
+                        <button class="action-btn reject-btn" onclick="confirmAction(${request.id}, 'reject', '${request.employee_id}')">Reject</button>
+                    ` : ''}
+                    <button class="action-btn delete-btn" onclick="confirmAction(${request.id}, 'delete', '${request.employee_id}')">Delete</button>
+                `;
+
+                document.getElementById('detailModal').style.display = 'block';
+            } else {
+                showAlert('Request not found', 'error');
+            }
+        } catch (error) {
+            console.error('Error viewing request details:', error);
+            showAlert('Failed to load request details', 'error');
+        }
+    }
+
+    async function confirmAction(id, action, employeeId) {
+        let confirmMessage;
+        if (action === 'approve') {
+            confirmMessage = `Are you sure you want to approve the leave request for Employee ID: ${employeeId}?`;
+        } else if (action === 'reject') {
+            confirmMessage = `Are you sure you want to reject the leave request for Employee ID: ${employeeId}?`;
+        } else {
+            confirmMessage = `Are you sure you want to delete the leave request for Employee ID: ${employeeId}? This action cannot be undone.`;
+        }
+
+        if (confirm(confirmMessage)) {
+            if (action === 'delete') {
+                await deleteRequest(id);
+            } else {
+                await updateRequestStatus(id, action === 'approve' ? 'approved' : 'rejected');
+            }
+            closeModal();
+        }
+    }
+
+    async function updateRequestStatus(id, status) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/leave-request/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                updateStats();
+                renderLeaveRequests(
+                    document.getElementById('searchBar').value,
+                    document.getElementById('statusFilter').value
+                );
+                showAlert(result.message, 'success');
+            } else {
+                showAlert(result.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error updating request status:', error);
+            showAlert('Failed to update request status', 'error');
+        }
+    }
+
+    async function deleteRequest(id) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/leave-request/${id}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                updateStats();
+                renderLeaveRequests(
+                    document.getElementById('searchBar').value,
+                    document.getElementById('statusFilter').value
+                );
+                showAlert(result.message, 'success');
+            } else {
+                showAlert(result.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting request:', error);
+            showAlert('Failed to delete request', 'error');
+        }
+    }
+
+    async function clearRecords() {
+        if (confirm('Are you sure you want to clear all records? This action cannot be undone.')) {
+            try {
+                const response = await fetch('http://localhost:3000/api/leave-requests', {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    updateStats();
+                    renderLeaveRequests();
+                    showAlert(result.message, 'success');
+                } else {
+                    showAlert(result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error clearing records:', error);
+                showAlert('Failed to clear records', 'error');
+            }
+        }
+    }
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        const alertMessage = document.getElementById('alertMessage');
+        alertMessage.textContent = message;
+        alert.className = `alert alert-${type}`;
+        alert.style.display = 'block';
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 3000);
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    document.getElementById('searchBar').addEventListener('input', (e) => {
+        renderLeaveRequests(e.target.value, document.getElementById('statusFilter').value);
+    });
+
+    document.getElementById('statusFilter').addEventListener('change', (e) => {
+        renderLeaveRequests(document.getElementById('searchBar').value, e.target.value);
+    });
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('detailModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+
+    // Initial load
+    updateStats();
+    renderLeaveRequests();
+    </script>
+</body>
+</html>
