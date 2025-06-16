@@ -5,7 +5,7 @@ const multer = require('multer');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3005;
 
 // Middleware
 app.use(cors());
@@ -14,9 +14,9 @@ app.use(express.json());
 // PostgreSQL connection
 const pool = new Pool({
     user: 'postgres',
-    host: 'localhost',
+    host: 'postgres',
     database: 'leave_management',
-    password: 'root',
+    password: 'admin123',
     port: 5432,
 });
 
