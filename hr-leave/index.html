@@ -469,7 +469,7 @@
 
     async function updateStats() {
         try {
-            const response = await fetch('http://13.53.49.44:3005/api/leave-requests');
+            const response = await fetch('http://13.60.50.126:3005/api/leave-requests');
             const leaveRequests = await response.json();
             stats.total = leaveRequests.length;
             stats.pending = leaveRequests.filter(req => req.status === 'pending').length;
@@ -488,7 +488,7 @@
 
     async function renderLeaveRequests(searchTerm = '', statusFilter = '') {
         try {
-            const url = new URL('http://13.53.49.44:3005/api/leave-requests');
+            const url = new URL('http://13.60.50.126:3005/api/leave-requests');
             if (searchTerm) url.searchParams.append('search', searchTerm);
             if (statusFilter) url.searchParams.append('status', statusFilter);
             const response = await fetch(url);
@@ -543,7 +543,7 @@
 
     async function viewRequestDetails(id) {
         try {
-            const response = await fetch(`http://13.53.49.44:3005/api/leave-requests?id=${id}`);
+            const response = await fetch(`http://13.60.50.126:3005/api/leave-requests?id=${id}`);
             const requests = await response.json();
             const request = requests.find(req => req.id === id);
 
@@ -558,7 +558,7 @@
                     certificateHTML = `
                         <div class="detail-row">
                             <span class="detail-label">Medical Certificate:</span>
-                            <a href="http://13.53.49.44:3005/api/certificate/${request.id}" class="certificate-link" download="certificate_${request.employee_id}.pdf" target="_blank">View Certificate</a>
+                            <a href="http://13.60.50.126:3005/api/certificate/${request.id}" class="certificate-link" download="certificate_${request.employee_id}.pdf" target="_blank">View Certificate</a>
                         </div>
                     `;
                 }
@@ -640,7 +640,7 @@
 
     async function updateRequestStatus(id, status) {
         try {
-            const response = await fetch(`http://13.53.49.44:3005/api/leave-request/${id}`, {
+            const response = await fetch(`http://13.60.50.126:3005/api/leave-request/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
@@ -665,7 +665,7 @@
 
     async function deleteRequest(id) {
         try {
-            const response = await fetch(`http://13.53.49.44:3005/api/leave-request/${id}`, {
+            const response = await fetch(`http://13.60.50.126:3005/api/leave-request/${id}`, {
                 method: 'DELETE'
             });
             const result = await response.json();
@@ -689,7 +689,7 @@
     async function clearRecords() {
         if (confirm('Are you sure you want to clear all records? This action cannot be undone.')) {
             try {
-                const response = await fetch('http://13.53.49.44:3005/api/leave-requests', {
+                const response = await fetch('http://13.60.50.126:3005/api/leave-requests', {
                     method: 'DELETE'
                 });
                 const result = await response.json();
