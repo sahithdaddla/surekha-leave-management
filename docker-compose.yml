@@ -6,7 +6,7 @@ services:
     image: postgres:16-alpine
     container_name: leave_postgres
     ports:
-      - "5433:5432"                # host:container
+      - "5600:5432"                # host:container
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin123
@@ -22,7 +22,7 @@ services:
     build: ./Backend               # uses Backend/Dockerfile
     container_name: leave_backend
     ports:
-      - "3005:3005"
+      - "3600:3600"
     depends_on:
       - postgres
     environment:
@@ -38,7 +38,7 @@ services:
     build: ./employee-leave
     container_name: employee_leave_ui
     ports:
-      - "8104:80"                  # host 8104 → nginx 80
+      - "8600:80"                  # host 8104 → nginx 80
     depends_on:
       - backend
     networks: [leave_net]
@@ -48,7 +48,7 @@ services:
     build: ./hr-leave
     container_name: hr_leave_ui
     ports:
-      - "8105:80"                  # host 8105 → nginx 80
+      - "8601:80"                  # host 8105 → nginx 80
     depends_on:
       - backend
     networks: [leave_net]
