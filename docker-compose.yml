@@ -4,7 +4,7 @@ services:
   # --------------------- PostgreSQL ---------------------------------------
   postgres:
     image: postgres:16-alpine
-    container_name: leave_postgres
+    container_name: leave1_postgres
     ports:
       - "5600:5432"                # host:container
     environment:
